@@ -1,53 +1,77 @@
-#include<iostream>
+#include <iostream>
 #include <vector>
-#include <cmath>
-#include <list>
-#include <unordered_map>
+#include <cstring>
 using namespace std;
-const int dx[4] ={-1,1,0,0};
-const int dy[4] ={0,0,-1,1};
 
-int map[2000][2000]={0,};
+const int dx[4] ={0,0,-1,1};
+const int dy[4] ={1,-1,0,0};
+
+ class atom{
+ public:
+ 	atom(int _x,int _y, int _dir, int _e){
+ 		x = _x;
+ 		y = _y;
+ 		dir = _dir;
+ 		e = _e;
+ 		explode = false;
+ 	}
+ 	int x,y;
+ 	int dir;
+ 	int e;
+ 	bool explode;
+ };
+
+int map[4001][4001];
+
 int main(){
-	int T;
-	cin >>T;
-	//(x,y,dir,b)
-	list<vector<int>> l;
-	for (int t=1; t<=T; t++){
-		int N;
-		cin >>N;
-		for (int i=0; i<N; i++){
-				int x,y,dir,b;
-				cin >> x >>y >>dir >>b;
-				vector<int> v={x+1000,y+1000, dir, b,0};
-				l.push_back(v);
-				map[x+1000][y+1000]= dir
+	int N,K;
+	cin >>N;
+	for (int t=0; t<N; t++){
+		cin >>K;
+		int count = 0;
+		memset(map, 0, sizeof(map));
+		vector<atom> v(K, atom(0,0,0,0));
+		for (int i=0; i<K; i++){
+			int x,y,dir,e;
+			cin >>x >>y >>dir >> e;
+			atom a = atom(2*(x+1000),2*(y+1000),dir,e);
+			v[i] = a;
+			
 		}
-		while(l.size() != 0){
-			memset(check,0, sizeof(check));
-			memset(copy_map, -1, sizeof(copy_map));
-			for (auto c : l){
-				int x = c[0]+ dx[c[2]];
-				int y = c[1]+ dy[c[2]];
-				if (x <0 || x >= N || y <0 || y >= 0){
-					c[4] =1;
-				}
-				if (x >=0 && x <N && y >=0 && y<N && map[x][y] > 0 && (map[x][y] + c[2]) %4 == 1){
-						c[4] = 1;
-						ans+= c[3];
-				}
-				if (c[4]) continue;
-				copy_map[x][y] = c[2];
-				check[x][y]++;
-			}
-			for (auto c : l){
-				if (c[4] == 1) {
-					l.erase(c)
+		int ans =0;
+		while(count <=4000){
+			bool check = false;
+			for (int i=0; i<K; i++){
+				if (v[i].explode) continue;
+				check = true;
+				int x = v[i].x;
+				int y = v[i].y;
+				v[i].x += dx[v[i].dir];
+				v[i].y += dy[v[i].dir];
+				map[x][y] = 0;
+				if (v[i].x <0 || v[i].x > 4000 || v[i].y <0 || v[i].y >4000) {
+					v[i].explode = true;
 					continue;
-				};
-
+				}
+				if (map[v[i].x][v[i].y] == 1){
+					map[v[i].x][v[i].y]+=2;
+				} else{
+					map[v[i].x][v[i].y]++;
+				}
 			}
+			if (!check) break;
+			for (int i=0; i<K; i++){
+				if (v[i].explode) continue;
+				if (map[v[i].x][v[i].y] == 1) continue;
+				if (map[v[i].x][v[i].y] == 2 ){
+					map[v[i].x][v[i].y]--;
+				}
+				map[v[i].x][v[i].y]--;
+				ans += v[i].e;
+				v[i].explode = true;
+			}
+			count++;
 		}
-		cout << "#"<<t<<" " <<ans <<"\n";
+		cout <<"#" <<t+1 <<" "<<ans<<"\n";
 	}
 }
